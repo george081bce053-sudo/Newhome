@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>ShakeTable Controller</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="roleOverlay" class="dialog-overlay active">
+        <div class="dialog-box">
+            <h2>Select Role</h2>
+            <div class="role-buttons">
+                <button id="btnSelectOperator" class="btn primary">Operator</button>
+                <button id="btnSelectJudge" class="btn secondary">Judge</button>
+            </div>
+            <div id="rolePasswordSection" style="display:none; margin-top:12px;">
+                <input id="rolePasswordInput" type="password" placeholder="Enter password" class="role-password-input">
+                <button id="btnRoleSubmit" class="btn primary" style="margin-top:8px;">Connect</button>
+            </div>
+            <div id="roleError" style="color:var(--red); margin-top:8px;"></div>
+        </div>
+    </div>
+
+    <div id="app">
+        <header class="app-header">
+            <div class="brand">
+                <span class="logo">⚙</span>
+                <h1>ShakeTable</h1>
+            </div>
+            <div class="header-actions">
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+                    <svg id="themeIconSun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg id="themeIconMoon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+                <button class="btn-icon" id="btnSwitchRole" aria-label="Switch role" title="Switch role">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="17 1 21 5 17 9"></polyline>
+                        <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                        <polyline points="7 23 3 19 7 15"></polyline>
+                        <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+                    </svg>
+                </button>
+                <button class="btn-icon" id="btnFullscreen" aria-label="Fullscreen">
+                    <svg id="fsEnter" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                    </svg>
+                    <svg id="fsExit" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                        <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="home">Home</button>
+            <button class="tab-btn" data-tab="presets" id="tabPresets">Presets</button>
+            <button class="tab-btn" data-tab="settings" id="tabSettings">Settings</button>
+        </nav>
+
+        <main class="pages">
+            <section class="page active" id="page-home">
+                <div class="status-bar card">
+                    <span id="statusDot" class="status-dot"></span>
+                    <span id="connectionStatus">Connecting</span>
+                    <span id="controllerStatus">–</span>
+                    <span id="wifiClients">0 clients</span>
+                    <span id="version">v1.0</span>
+                </div>
+
+                <div class="timer-card card">
+                    <div class="timer-display">
+                        <div class="timer-circle">
+                            <svg viewBox="0 0 120 120" class="progress-ring">
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="var(--bg-card)" stroke-width="8"/>
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="var(--accent)" stroke-width="8"
+                                        stroke-dasharray="339.292" stroke-dashoffset="339.292"
+                                        id="progressArc" transform="rotate(-90 60 60)"/>
+                            </svg>
+                            <div class="timer-text" id="timerDisplay">00:00.000</div>
+                        </div>
+                        <div class="timer-sub" id="timerSub">Remaining: 00:00.000</div>
+                    </div>
+                </div>
+
+                <div class="controls card" id="operatorControls">
+                    <div class="preset-selector">
+                        <select id="presetSelect"></select>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn primary" id="btnStart">Start</button>
+                        <button class="btn secondary" id="btnPause">Pause</button>
+                        <button class="btn secondary" id="btnResume">Resume</button>
+                        <button class="btn danger" id="btnStop">Stop</button>
+                    </div>
+                </div>
+
+                <div class="lap-section">
+                    <button class="btn lap" id="btnLap">LAP</button>
+                    <div class="shortcut-hint">Press SPACE for LAP</div>
+                </div>
+
+                <div class="event-log card">
+                    <h2>Lap Log</h2>
+                    <div id="lapList"></div>
+                </div>
+
+                <div class="event-log card">
+                    <h2>Event Log</h2>
+                    <div id="eventList"></div>
+                </div>
+
+                <div class="fault-display card" id="faultDisplay" style="display:none;">
+                    <p><strong>FAULT:</strong> <span id="faultReason"></span></p>
+                </div>
+            </section>
+
+            <section class="page" id="page-presets">
+                <div class="presets-header card">
+                    <h2>Presets</h2>
+                    <button class="btn primary" id="btnShowAddPreset">+ New Preset</button>
+                </div>
+
+                <div class="preset-form-card card" id="presetFormCard" style="display:none;">
+                    <h3 id="presetFormTitle">New Preset</h3>
+                    <div class="preset-form">
+                        <input id="presetFormId" type="hidden">
+                        <input id="presetNameInput" placeholder="Name" maxlength="23">
+                        <input id="presetFreqInput" type="number" step="0.1" placeholder="Freq (Hz)">
+                        <input id="presetFwdAngleInput" type="number" step="0.1" placeholder="Fwd °">
+                        <input id="presetBackAngleInput" type="number" step="0.1" placeholder="Back °">
+                        <input id="presetDurationInput" type="number" placeholder="Duration (s)">
+                        <div class="preset-form-actions">
+                            <button class="btn primary" id="btnSavePreset">Save</button>
+                            <button class="btn secondary" id="btnCancelPreset">Cancel</button>
+                        </div>
+                    </div>
+                    <div class="validation-message" id="presetValidation"></div>
+                </div>
+
+                <div class="preset-list card">
+                    <div id="presetList"></div>
+                </div>
+            </section>
+
+            <section class="page" id="page-settings">
+                <div class="settings-card card">
+                    <h2>Settings</h2>
+
+                    <div id="settingsLockedSection" class="settings-locked">
+                        <h3>Protected Settings</h3>
+                        <p>Enter the password to unlock.</p>
+                        <div class="auth-form">
+                            <input id="settingsPasswordInput" type="password" placeholder="Password">
+                            <button class="btn primary" id="btnUnlockSettings">Unlock</button>
+                        </div>
+                        <div class="validation-message" id="settingsAuthMessage"></div>
+                    </div>
+
+                    <div id="settingsUnlockedSection" style="display:none;">
+                        <div class="settings-section">
+                            <h3>Security</h3>
+                            <div class="auth-form">
+                                <input id="settingsLockPasswordInput" type="password" placeholder="Enter password to lock">
+                                <button class="btn secondary" id="btnLockSettings">Lock</button>
+                            </div>
+                            <div class="validation-message" id="settingsLockMessage"></div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Wi-Fi Settings</h3>
+                            <label>SSID</label>
+                            <input id="settingsSsid" type="text">
+                            <label>Password</label>
+                            <input id="settingsPassword" type="password">
+                            <button class="btn primary" id="btnSaveWifi">Save Wi-Fi Settings</button>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Motion Limits</h3>
+                            <label>Frequency Limits (Hz)</label>
+                            <div style="display:flex; gap:8px;">
+                                <input id="settingsMinFreq" type="number" step="0.1" placeholder="Min" style="flex:1;">
+                                <input id="settingsMaxFreq" type="number" step="0.1" placeholder="Max" style="flex:1;">
+                            </div>
+                            <label>Stroke Angle Limits (°)</label>
+                            <div style="display:flex; gap:8px;">
+                                <input id="settingsMinAngle" type="number" step="0.1" placeholder="Min" style="flex:1;">
+                                <input id="settingsMaxAngle" type="number" step="0.1" placeholder="Max" style="flex:1;">
+                            </div>
+                            <button class="btn primary" id="btnSaveLimits">Save Motion Limits</button>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Controller / Safety</h3>
+                            <label>Controller Timeout (ms)</label>
+                            <input id="settingsTimeout" type="number" min="1000" max="5000" step="100">
+                            <button class="btn primary" id="btnSaveTimeout">Save Timeout</button>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>LED</h3>
+                            <label>
+                                <input id="settingsLed" type="checkbox" checked> LED Enabled
+                            </label>
+                            <button class="btn secondary" id="btnSaveLed">Save LED Setting</button>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Motor Enable Control</h3>
+                            <label>
+                                <input id="settingsMotorEnableX" type="checkbox"> Enable X motor EN pin
+                            </label>
+                            <label>
+                                <input id="settingsMotorEnableY" type="checkbox"> Enable Y motor EN pin
+                            </label>
+                            <p style="font-size:12px; color:var(--text-tertiary);">Check only if you have wired the EN pin to the driver.</p>
+                            <button class="btn secondary" id="btnSaveMotorEnable">Save Motor Enable</button>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Passwords</h3>
+                            <label>Operator Password</label>
+                            <input type="password" id="settingsOpPass" placeholder="New operator password">
+                            <label>Judge Password</label>
+                            <input type="password" id="settingsJudgePass" placeholder="New judge password">
+                            <label>Settings Password</label>
+                            <input type="password" id="settingsSetPass" placeholder="New settings password">
+                            <button class="btn primary" id="btnSavePasswords">Save Passwords</button>
+                            <p style="font-size:12px; color:var(--text-tertiary);">Current status: <span id="passwordStatus"></span></p>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Firmware</h3>
+                            <p style="font-size:12px; color:var(--text-tertiary);">Upload a .bin firmware file to update this device over Wi-Fi. Stop the current run first - uploads are blocked while a test is active.</p>
+                            <input type="file" id="firmwareFile" accept=".bin">
+                            <button class="btn primary" id="btnUploadFirmware">Upload Firmware</button>
+                            <progress id="firmwareProgress" value="0" max="100" style="display:none; width:100%; margin-top:8px;"></progress>
+                            <p id="firmwareStatus" style="font-size:12px; color:var(--text-tertiary); margin-top:4px;"></p>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Factory</h3>
+                            <button class="btn danger" id="btnRestoreDefaults">Restore Defaults</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <div class="dialog-overlay" id="confirmOverlay" style="display:none;">
+        <div class="dialog-box">
+            <h3>Are you sure?</h3>
+            <p id="confirmMessage">Stop the running experiment?</p>
+            <div class="dialog-actions">
+                <button class="btn secondary" id="confirmCancel">Cancel</button>
+                <button class="btn danger" id="confirmOk">Yes, stop</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
